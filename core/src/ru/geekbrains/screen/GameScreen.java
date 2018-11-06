@@ -1,6 +1,8 @@
 package ru.geekbrains.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -28,10 +30,17 @@ public class GameScreen extends Base2DScreen {
     private MainShip mainShip;
 
     private BulletPool bulletPool;
+    private Music bgmusic;
+    private Sound shootSound;
+
 
     @Override
     public void show() {
         super.show();
+        bgmusic = Gdx.audio.newMusic(Gdx.files.internal("sound/Background.mp3"));
+
+        bgmusic.setLooping(true);
+        bgmusic.play();
         bgTexture = new Texture("bg.png");
         background = new Background(new TextureRegion(bgTexture));
         textureAtlas = new TextureAtlas("mainAtlas.tpack");
@@ -111,11 +120,13 @@ public class GameScreen extends Base2DScreen {
 
     @Override
     public boolean touchDown(Vector2 touch, int pointer) {
+        mainShip.touchDown(touch,pointer);
         return super.touchDown(touch, pointer);
     }
 
     @Override
     public boolean touchUp(Vector2 touch, int pointer) {
+        mainShip.touchUp(touch,pointer);
         return super.touchUp(touch, pointer);
     }
 }
