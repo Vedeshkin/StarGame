@@ -1,6 +1,8 @@
 package ru.geekbrains.screen;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -29,9 +31,14 @@ public class GameScreen extends Base2DScreen {
 
     private BulletPool bulletPool;
 
+    private Sound laserSound;
+    private Music music;
+
     @Override
     public void show() {
         super.show();
+        laserSound = Gdx.audio.newSound(Gdx.files.internal("sounds/laser.wav"));
+
         bgTexture = new Texture("bg.png");
         background = new Background(new TextureRegion(bgTexture));
         textureAtlas = new TextureAtlas("mainAtlas.tpack");
@@ -40,7 +47,11 @@ public class GameScreen extends Base2DScreen {
             stars[i] = new Star(textureAtlas);
         }
         bulletPool = new BulletPool();
-        mainShip = new MainShip(textureAtlas, bulletPool);
+        mainShip = new MainShip(textureAtlas, bulletPool, laserSound);
+
+        music = Gdx.audio.newMusic(Gdx.files.internal("sounds/music.mp3"));
+        music.setLooping(true);
+        music.play();
     }
 
     @Override
@@ -94,6 +105,8 @@ public class GameScreen extends Base2DScreen {
     public void dispose() {
         bgTexture.dispose();
         textureAtlas.dispose();
+        music.dispose();
+        laserSound.dispose();
         super.dispose();
     }
 
@@ -111,11 +124,13 @@ public class GameScreen extends Base2DScreen {
 
     @Override
     public boolean touchDown(Vector2 touch, int pointer) {
+        mainShip.touchDown(touch, pointer);
         return super.touchDown(touch, pointer);
     }
 
     @Override
     public boolean touchUp(Vector2 touch, int pointer) {
+        mainShip.touchUp(touch, pointer);
         return super.touchUp(touch, pointer);
     }
 }
