@@ -23,6 +23,7 @@ public class Enemy extends Ship {
     @Override
     public void update(float delta) {
         super.update(delta);
+        pos.mulAdd(v, delta);
     }
 
     public void set(
