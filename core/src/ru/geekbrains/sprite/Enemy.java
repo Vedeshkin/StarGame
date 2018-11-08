@@ -24,9 +24,8 @@ public class Enemy extends Ship {
     @Override
     public void update(float delta) {
         super.update(delta);
-        if( ! (getTop() <= worldBounds.getTop())){
+        if( !(getTop() <= worldBounds.getTop())){
             pos.mulAdd(initialV, delta);
-            System.out.println("not on the screen yet");
         }else  {
             pos.mulAdd(v, delta);
         }
