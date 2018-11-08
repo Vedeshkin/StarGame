@@ -24,6 +24,14 @@ public class Enemy extends Ship {
     public void update(float delta) {
         super.update(delta);
         pos.mulAdd(v, delta);
+        reloadTimer += delta;
+        if (reloadTimer >= reloadInterval) {
+            shoot();
+            reloadTimer = 0f;
+        }
+        if (isOutside(worldBounds)) {
+            destroy();
+        }
     }
 
     public void set(
@@ -48,4 +56,6 @@ public class Enemy extends Ship {
         setHeightProportion(height);
         v.set(v0);
     }
+
+
 }
