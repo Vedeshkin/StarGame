@@ -11,7 +11,12 @@ import ru.geekbrains.pool.BulletPool;
 
 public class Enemy extends Ship {
 
+    private enum State { DESCENT, FIGHT }
+
     private Vector2 v0 = new Vector2();
+
+    private State state;
+    private Vector2 descentV = new Vector2(0, -0.15f);
 
     public Enemy(BulletPool bulletPool, Rect worldBounds, Sound shootSound) {
         super(shootSound);
@@ -24,6 +29,25 @@ public class Enemy extends Ship {
     public void update(float delta) {
         super.update(delta);
         pos.mulAdd(v, delta);
+
+        switch (state) {
+            case DESCENT:
+                if (getTop() <= worldBounds.getTop()) {
+                    v.set(v0);
+                    state = State.FIGHT;
+                }
+                break;
+            case FIGHT:
+                reloadTimer += delta;
+                if (reloadTimer >= reloadInterval) {
+                    shoot();
+                    reloadTimer = 0f;
+                }
+                if (getBottom() < worldBounds.getBottom()) {
+                    destroy();
+                }
+                break;
+        }
     }
 
     public void set(
@@ -45,7 +69,9 @@ public class Enemy extends Ship {
         this.bulletDamage = bulletDamage;
         this.reloadInterval = reloadInterval;
         this.hp = hp;
+        this.reloadTimer = reloadInterval;
         setHeightProportion(height);
-        v.set(v0);
+        v.set(descentV);
+        state = State.DESCENT;
     }
 }
