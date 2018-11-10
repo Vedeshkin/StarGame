@@ -77,4 +77,19 @@ public class Enemy extends Ship {
         v.set(descentV);
         state = State.DESCENT;
     }
+
+    public boolean isBulletCollision(Rect bullet) {
+        return !(bullet.getRight() < getLeft()
+                || bullet.getLeft() > getRight()
+                || bullet.getBottom() > getTop()
+                || bullet.getTop() < pos.y
+        );
+    }
+
+    @Override
+    public void destroy() {
+        boom();
+        hp = 0;
+        super.destroy();
+    }
 }
