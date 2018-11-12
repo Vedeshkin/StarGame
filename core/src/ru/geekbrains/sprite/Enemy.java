@@ -12,6 +12,7 @@ import ru.geekbrains.pool.BulletPool;
 public class Enemy extends Ship {
 
     private Vector2 v0 = new Vector2();
+    private static final Vector2 initialV = new Vector2(0, -0.3f);
 
     public Enemy(BulletPool bulletPool, Rect worldBounds, Sound shootSound) {
         super(shootSound);
@@ -23,7 +24,19 @@ public class Enemy extends Ship {
     @Override
     public void update(float delta) {
         super.update(delta);
-        pos.mulAdd(v, delta);
+        if( !(getTop() <= worldBounds.getTop())){
+            pos.mulAdd(initialV, delta);
+        }else  {
+            pos.mulAdd(v, delta);
+        }
+        reloadTimer += delta;
+        if (reloadTimer >= reloadInterval) {
+            shoot();
+            reloadTimer = 0f;
+        }
+        if (isOutside(worldBounds)) {
+            destroy();
+        }
     }
 
     public void set(
@@ -48,4 +61,6 @@ public class Enemy extends Ship {
         setHeightProportion(height);
         v.set(v0);
     }
+
+
 }
