@@ -13,6 +13,13 @@ public abstract class SpritesPool<T extends Sprite> {
 
     protected abstract T newObject();
 
+    public void freeAllActiveObjects(){
+
+        freeObjects.addAll(activeObjects);
+        activeObjects.clear();
+
+    }
+
     public T obtain() {
         T object;
         if (freeObjects.isEmpty()) {
