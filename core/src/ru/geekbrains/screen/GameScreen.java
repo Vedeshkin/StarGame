@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Vector2;
 
 import java.util.List;
 
+import ru.geekbrains.base.ActionListener;
 import ru.geekbrains.base.Base2DScreen;
 import ru.geekbrains.math.Rect;
 import ru.geekbrains.pool.BulletPool;
@@ -18,14 +19,15 @@ import ru.geekbrains.pool.EnemyPool;
 import ru.geekbrains.pool.ExplosionPool;
 import ru.geekbrains.sprite.Background;
 import ru.geekbrains.sprite.Bullet;
+import ru.geekbrains.sprite.ButtonNewGame;
+import ru.geekbrains.sprite.CaptionGameOver;
 import ru.geekbrains.sprite.Enemy;
-import ru.geekbrains.sprite.Explosion;
 import ru.geekbrains.sprite.MainShip;
 import ru.geekbrains.sprite.Star;
 import ru.geekbrains.utils.EnemiesEmmiter;
 
 
-public class GameScreen extends Base2DScreen {
+public class GameScreen extends Base2DScreen implements ActionListener {
 
     private static final int STAR_COUNT = 64;
 
@@ -35,7 +37,14 @@ public class GameScreen extends Base2DScreen {
     private TextureAtlas textureAtlas;
     private Star[] stars;
 
+
+
+    private enum State {GAME_OVER,PLAYING}
+    private State state;
+
     private MainShip mainShip;
+    private ButtonNewGame buttonNewGame;
+    private CaptionGameOver captionGameOver;
 
     private BulletPool bulletPool;
 
@@ -58,13 +67,16 @@ public class GameScreen extends Base2DScreen {
         bgTexture = new Texture("bg.png");
         background = new Background(new TextureRegion(bgTexture));
         textureAtlas = new TextureAtlas("mainAtlas.tpack");
-        stars =new Star[STAR_COUNT];
+        stars = new Star[STAR_COUNT];
         for (int i = 0; i < stars.length; i++) {
             stars[i] = new Star(textureAtlas);
         }
         explosionPool = new ExplosionPool(textureAtlas, explosionSound);
         bulletPool = new BulletPool();
-        mainShip = new MainShip(textureAtlas, bulletPool, explosionPool, laserSound);
+        mainShip = new MainShip(textureAtlas,worldBounds, bulletPool, explosionPool, laserSound);
+
+        captionGameOver = new CaptionGameOver(textureAtlas);
+        buttonNewGame = new ButtonNewGame(textureAtlas,this);
 
         enemyPool = new EnemyPool(bulletPool, explosionPool, worldBounds, bulletSound);
         enemiesEmmiter = new EnemiesEmmiter(enemyPool, worldBounds, textureAtlas);
@@ -72,6 +84,7 @@ public class GameScreen extends Base2DScreen {
         music = Gdx.audio.newMusic(Gdx.files.internal("sounds/music.mp3"));
         music.setLooping(true);
         music.play();
+        newGame();
     }
 
     @Override
@@ -87,11 +100,22 @@ public class GameScreen extends Base2DScreen {
         for (int i = 0; i < stars.length; i++) {
             stars[i].update(delta);
         }
-        mainShip.update(delta);
-        bulletPool.updateActiveObjects(delta);
-        enemyPool.updateActiveObjects(delta);
         explosionPool.updateActiveObjects(delta);
-        enemiesEmmiter.generate(delta);
+        switch (state) {
+            case PLAYING:
+                mainShip.update(delta);
+                bulletPool.updateActiveObjects(delta);
+                enemyPool.updateActiveObjects(delta);
+                enemiesEmmiter.generate(delta);
+                if(mainShip.isDestroyed()){
+                    state = State.GAME_OVER;
+                    bulletPool.freeAllActiveObjects();
+                    enemyPool.freeAllActiveObjects();
+                }
+                break;
+            case GAME_OVER:
+                break;
+                }
     }
 
     public void checkCollisions() {
@@ -156,6 +180,10 @@ public class GameScreen extends Base2DScreen {
         bulletPool.drawActiveObjects(batch);
         enemyPool.drawActiveObjects(batch);
         explosionPool.drawActiveObjects(batch);
+        if (state == state.GAME_OVER){
+            buttonNewGame.draw(batch);
+            captionGameOver.draw(batch);
+        }
         batch.end();
     }
 
@@ -193,12 +221,28 @@ public class GameScreen extends Base2DScreen {
     @Override
     public boolean touchDown(Vector2 touch, int pointer) {
         mainShip.touchDown(touch, pointer);
+        buttonNewGame.touchDown(touch,pointer);
         return super.touchDown(touch, pointer);
     }
 
     @Override
     public boolean touchUp(Vector2 touch, int pointer) {
         mainShip.touchUp(touch, pointer);
+        buttonNewGame.touchUp(touch,pointer);
         return super.touchUp(touch, pointer);
+    }
+
+    @Override
+    public void actionPerformed(Object src) {
+        if (src == buttonNewGame){
+            System.out.println("Button pressed");
+            newGame();
+        }
+
+    }
+
+    private void newGame() {
+        state = State.PLAYING;
+        mainShip.resetShip();
     }
 }
