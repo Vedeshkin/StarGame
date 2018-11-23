@@ -15,7 +15,6 @@ public class Enemy extends Ship {
     private enum State { DESCENT, FIGHT }
 
     private Vector2 v0 = new Vector2();
-
     private State state;
     private Vector2 descentV = new Vector2(0, -0.15f);
 
@@ -78,7 +77,7 @@ public class Enemy extends Ship {
         state = State.DESCENT;
     }
 
-    public boolean isBulletCollision(Rect bullet) {
+    public boolean isCollision(Rect bullet) {
         return !(bullet.getRight() < getLeft()
                 || bullet.getLeft() > getRight()
                 || bullet.getBottom() > getTop()

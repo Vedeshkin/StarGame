@@ -72,6 +72,7 @@ public abstract class Ship extends Sprite {
         hp -= damage;
         if (hp <= 0) {
             destroy();
+
         }
     }
 
