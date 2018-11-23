@@ -24,7 +24,7 @@ import ru.geekbrains.sprite.Background;
 import ru.geekbrains.sprite.Bullet;
 import ru.geekbrains.sprite.ButtonNewGame;
 import ru.geekbrains.sprite.Enemy;
-import ru.geekbrains.sprite.HealPack;
+import ru.geekbrains.sprite.Bonus;
 import ru.geekbrains.sprite.MainShip;
 import ru.geekbrains.sprite.MessageGameOver;
 import ru.geekbrains.sprite.Star;
@@ -95,8 +95,8 @@ public class GameScreen extends Base2DScreen implements ActionListener {
         enemyPool = new EnemyPool(bulletPool, explosionPool, worldBounds, bulletSound);
         enemiesEmmiter = new EnemiesEmmiter(enemyPool, worldBounds, textureAtlas);
 
-        bonusPool = new BonusPool(worldBounds);
-        bonusEmmiter = new BonusEmmiter(worldBounds,bonusPool);
+        bonusPool = new BonusPool();
+        bonusEmmiter = new BonusEmmiter(worldBounds,bonusPool,enemyPool,bulletPool,mainShip);
 
         messageGameOver = new MessageGameOver(textureAtlas);
         buttonNewGame = new ButtonNewGame(textureAtlas, this);
@@ -132,7 +132,7 @@ public class GameScreen extends Base2DScreen implements ActionListener {
           enemyPool.updateActiveObjects(delta);
           mainShip.update(delta);
           enemiesEmmiter.generate(delta, frags);
-          bonusEmmiter.spawnHealBonus(delta);
+          bonusEmmiter.generateBonus(delta);
           if (mainShip.isDestroyed()) {
               state = State.GAME_OVER;
           }
@@ -187,15 +187,16 @@ public class GameScreen extends Base2DScreen implements ActionListener {
             }
         }
 
-        List<HealPack> healPackList = bonusPool.getActiveObjects();
-        for (HealPack hp : healPackList)
+        List<Bonus> bonusList = bonusPool.getActiveObjects();
+        for (Bonus bonus : bonusList)
         {
-            if (hp.isDestroyed()) {
+            if (bonus.isDestroyed()) {
                 continue;
             }
-            if(mainShip.isCollision(hp)){
-                hp.destroy();
-                mainShip.addHP(hp.getHeal());
+            if(mainShip.isCollision(bonus)){
+                bonus.destroy();
+                bonus.doAction();
+
             }
         }
 
