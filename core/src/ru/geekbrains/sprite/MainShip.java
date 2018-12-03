@@ -15,6 +15,7 @@ import ru.geekbrains.pool.ExplosionPool;
 public class MainShip extends Ship {
 
     private static final int INVALID_POINTER = -1;
+    private static final int MAX_HP = 100;
 
     private Vector2 v0 = new Vector2(0.5f, 0);
 
@@ -24,20 +25,34 @@ public class MainShip extends Ship {
     private int leftPointer = INVALID_POINTER;
     private int rightPointer = INVALID_POINTER;
 
-    public MainShip(TextureAtlas atlas, Rect worldBounds, BulletPool bulletPool, ExplosionPool explosionPool, Sound shootSound) {
+    public MainShip(TextureAtlas atlas, BulletPool bulletPool, ExplosionPool explosionPool, Rect worldBounds, Sound shootSound) {
         super(atlas.findRegion("main_ship"), 1, 2, 2, shootSound);
         setHeightProportion(0.15f);
         this.bulletPool = bulletPool;
+        this.bulletRegion = atlas.findRegion("bulletMainShip");
+        this.explosionPool = explosionPool;
+        this.worldBounds = worldBounds;
+        startNewGame();
+    }
+
+    public void startNewGame() {
+        pos.x = worldBounds.pos.x;
         this.bulletV.set(0, 0.5f);
         this.bulletHeight = 0.01f;
         this.bulletDamage = 1;
         this.reloadInterval = 0.2f;
-        this.bulletRegion = atlas.findRegion("bulletMainShip");
-        this.explosionPool = explosionPool;
-        this.worldBounds = worldBounds;
-        this.hp = 100;
+        this.hp = MAX_HP;
+        flushDestroy();
     }
-
+    public void addHP(int hp)
+    {
+        if(getHp()+ hp >= MAX_HP)
+        {
+            this.hp = MAX_HP;
+            return;
+        }
+        this.hp = getHp()+ hp;
+    }
     @Override
     public void update(float delta) {
         super.update(delta);
@@ -154,7 +169,7 @@ public class MainShip extends Ship {
         v.setZero();
     }
 
-    public boolean isBulletCollision(Rect bullet) {
+    public boolean isCollision(Rect bullet) {
         return !(bullet.getRight() < getLeft()
                 || bullet.getLeft() > getRight()
                 || bullet.getBottom() > pos.y
@@ -167,11 +182,5 @@ public class MainShip extends Ship {
         boom();
         hp = 0;
         super.destroy();
-    }
-
-    public void resetShip(){
-        pos.x = worldBounds.pos.x;
-        flushDestroy();
-        this.hp = 100;
     }
 }
